@@ -1,0 +1,35 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: gannar-admin
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_ADMIN_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PWD}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
+      DEV1_USERNAME: ${DB_DEV1_USER}
+      DEV2_USERNAME: ${DB_DEV2_USER}
+    ports:
+      - ${DB_LOCAL_PORT}:${DB_PORT}
+    volumes:
+      - ./init.db:/docker-entrypoint-initdb.d
+      - ./data:/data/db
+      - ./logs:/var/log/mongodb
+  redis:
+    image: redis:latest
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_HOSTS=${COMPOSE_PROJECT_NAME}:redis:${REDIS_PORT}
+    ports:
+      - ${REDIS_CMD_PORT}:${REDIS_CMD_PORT}
+
+networks:
+  local-network:
+    driver: bridge
